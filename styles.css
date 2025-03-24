@@ -1,0 +1,64 @@
+/* 基础样式设置 */
+body, html {
+    overflow-x: hidden;
+    width: 100%;
+    margin: 0;
+    padding: 0;
+    background-color: #f5f7fa;
+}
+
+/* 容器设置 */
+.container-fluid {
+    padding: 0 !important;
+    margin: 0 !important;
+    overflow-x: hidden;
+}
+
+/* 行样式 */
+.row {
+    --bs-gutter-x: 0;
+    --bs-gutter-y: 0;
+    margin: 0;
+}
+
+/* 内容区域样式 */
+.page-content {
+    padding: 1.5rem;
+    background-color: #f5f7fa;
+}
+
+/* 表格容器样式 */
+.table-responsive {
+    overflow-x: auto;
+    border: none;
+    margin: 0;
+    padding: 0;
+}
+
+/* 表格样式 */
+.table th,
+.table td {
+    white-space: nowrap;
+    text-wrap: nowrap;
+    padding: 0.75rem;
+    text-align: center;
+    border: 1px solid #dee2e6;
+}
+
+/* 滚动条样式 */
+.table-responsive::-webkit-scrollbar {
+    height: 8px;
+}
+
+.table-responsive::-webkit-scrollbar-track {
+    background: #f1f1f1;
+}
+
+.table-responsive::-webkit-scrollbar-thumb {
+    background: #ccc;
+    border-radius: 4px;
+}
+
+.table-responsive::-webkit-scrollbar-thumb:hover {
+    background: #999;
+}

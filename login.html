@@ -1,0 +1,394 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>绿动发货管理系统 - 登录</title>
+    <link href="https://cdn.bootcdn.net/ajax/libs/twitter-bootstrap/5.3.0/css/bootstrap.min.css" rel="stylesheet">
+    <!-- 引入Font Awesome图标库 -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
+    <!-- 引入动画库 -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css">
+    <style>
+        :root {
+            --primary-color: #36b37e;
+            --secondary-color: #253858;
+            --accent-color: #00875a;
+            --light-color: #f5f8fa;
+            --text-color: #172b4d;
+            --border-radius: 12px;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #f5f7fa 0%, #e4edf5 100%);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+            margin: 0;
+            color: var(--text-color);
+        }
+        
+        .login-container {
+            display: flex;
+            width: 100%;
+            max-width: 900px;
+            height: 550px;
+            border-radius: var(--border-radius);
+            box-shadow: 0 15px 30px rgba(0, 0, 0, 0.1);
+            overflow: hidden;
+        }
+        
+        .login-sidebar {
+            flex: 1;
+            background: linear-gradient(135deg, var(--primary-color) 0%, var(--accent-color) 100%);
+            padding: 40px;
+            color: white;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+        }
+        
+        .login-form-container {
+            flex: 1;
+            background-color: white;
+            padding: 40px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+        }
+        
+        .login-logo {
+            margin-bottom: 30px;
+        }
+        
+        .login-logo h2 {
+            font-weight: 700;
+            font-size: 2.5rem;
+            margin-bottom: 10px;
+            color: #fff;
+        }
+        
+        .login-logo p {
+            font-size: 1rem;
+            opacity: 0.9;
+        }
+        
+        .login-features {
+            margin-top: 40px;
+        }
+        
+        .login-feature-item {
+            display: flex;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+        
+        .login-feature-icon {
+            width: 36px;
+            height: 36px;
+            background-color: rgba(255, 255, 255, 0.2);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-right: 15px;
+        }
+        
+        .login-feature-text {
+            font-size: 1rem;
+        }
+        
+        .login-copyright {
+            font-size: 0.8rem;
+            opacity: 0.8;
+        }
+        
+        .login-form-header {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+        
+        .login-form-header h3 {
+            font-weight: 600;
+            color: var(--secondary-color);
+            font-size: 1.8rem;
+            margin-bottom: 10px;
+        }
+        
+        .login-form-header p {
+            color: #6b778c;
+            font-size: 0.95rem;
+        }
+        
+        .login-form .form-group {
+            margin-bottom: 25px;
+            position: relative;
+        }
+        
+        .login-form .form-control {
+            height: 50px;
+            padding-left: 45px;
+            border-radius: 8px;
+            border: 1px solid #dfe1e6;
+            transition: all 0.3s;
+            font-size: 0.95rem;
+        }
+        
+        .login-form .form-control:focus {
+            border-color: var(--primary-color);
+            box-shadow: 0 0 0 4px rgba(54, 179, 126, 0.2);
+        }
+        
+        .form-icon {
+            position: absolute;
+            left: 15px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: #97a0af;
+            z-index: 2;
+        }
+        
+        .login-btn {
+            height: 50px;
+            border-radius: 8px;
+            background-color: var(--primary-color);
+            border: none;
+            font-weight: 600;
+            transition: all 0.3s;
+            font-size: 1rem;
+            letter-spacing: 0.5px;
+            box-shadow: 0 4px 12px rgba(54, 179, 126, 0.3);
+        }
+        
+        .login-btn:hover {
+            background-color: var(--accent-color);
+            transform: translateY(-2px);
+            box-shadow: 0 6px 15px rgba(54, 179, 126, 0.4);
+        }
+        
+        .login-btn:active {
+            transform: translateY(0);
+        }
+        
+        .auth-error {
+            display: none;
+            padding: 12px;
+            background-color: #ffebe6;
+            color: #c9190b;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            text-align: center;
+            font-size: 0.9rem;
+            animation-duration: 0.5s;
+        }
+        
+        .system-notice {
+            font-size: 0.8rem;
+            color: #97a0af;
+            text-align: center;
+            margin-top: 30px;
+        }
+        
+        .system-notice p {
+            margin-bottom: 5px;
+        }
+        
+        .form-check-label {
+            color: #6b778c;
+            font-size: 0.9rem;
+        }
+        
+        .form-check-input:checked {
+            background-color: var(--primary-color);
+            border-color: var(--primary-color);
+        }
+        
+        /* 响应式调整 */
+        @media (max-width: 768px) {
+            .login-container {
+                flex-direction: column;
+                height: auto;
+                max-width: 500px;
+            }
+            
+            .login-sidebar {
+                padding: 30px;
+            }
+            
+            .login-feature-item {
+                margin-bottom: 15px;
+            }
+            
+            .login-form-container {
+                padding: 30px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="login-container animate__animated animate__fadeIn">
+        <!-- 左侧信息栏 -->
+        <div class="login-sidebar">
+            <div class="login-logo">
+                <h2>绿动发货</h2>
+                <p>高效物流管理系统</p>
+            </div>
+            
+            <div class="login-features">
+                <div class="login-feature-item animate__animated animate__fadeInLeft animate__delay-1s">
+                    <div class="login-feature-icon">
+                        <i class="fas fa-truck-fast"></i>
+                    </div>
+                    <div class="login-feature-text">快速订单处理与发货跟踪</div>
+                </div>
+                <div class="login-feature-item animate__animated animate__fadeInLeft animate__delay-2s">
+                    <div class="login-feature-icon">
+                        <i class="fas fa-chart-line"></i>
+                    </div>
+                    <div class="login-feature-text">实时物流数据分析与报表</div>
+                </div>
+                <div class="login-feature-item animate__animated animate__fadeInLeft animate__delay-3s">
+                    <div class="login-feature-icon">
+                        <i class="fas fa-print"></i>
+                    </div>
+                    <div class="login-feature-text">电子面单一键生成与打印</div>
+                </div>
+            </div>
+            
+            <div class="login-copyright">
+                © 2024 绿动物流管理系统 · 专业物流解决方案
+            </div>
+        </div>
+        
+        <!-- 右侧登录表单 -->
+        <div class="login-form-container">
+            <div class="login-form-header">
+                <h3>欢迎登录</h3>
+                <p>请输入您的账号信息继续访问系统</p>
+            </div>
+            
+            <div class="auth-error animate__animated animate__headShake" id="authError">
+                <i class="fas fa-circle-exclamation me-2"></i>账号或授权码错误，请重试
+            </div>
+            
+            <form class="login-form" id="loginForm">
+                <div class="form-group">
+                    <i class="fas fa-user form-icon"></i>
+                    <input type="text" class="form-control" id="username" placeholder="请输入账号" required>
+                </div>
+                
+                <div class="form-group">
+                    <i class="fas fa-lock form-icon"></i>
+                    <input type="password" class="form-control" id="password" placeholder="请输入密码" required>
+                </div>
+                
+                <div class="form-group">
+                    <i class="fas fa-key form-icon"></i>
+                    <input type="text" class="form-control" id="authCode" placeholder="请输入授权码" required>
+                </div>
+                
+                <div class="form-check mb-3">
+                    <input class="form-check-input" type="checkbox" id="rememberUsername">
+                    <label class="form-check-label" for="rememberUsername">
+                        记住用户名
+                    </label>
+                </div>
+                
+                <button type="submit" class="btn btn-primary w-100 login-btn">
+                    <i class="fas fa-sign-in-alt me-2"></i>登录系统
+                </button>
+            </form>
+            
+            <div class="system-notice">
+                <p>本系统仅供内部使用，未经授权禁止访问</p>
+                <p>如有问题请联系系统管理员</p>
+            </div>
+        </div>
+    </div>
+    
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const loginForm = document.getElementById('loginForm');
+            const authError = document.getElementById('authError');
+            
+            // 检查是否有保存的用户名
+            const savedUsername = localStorage.getItem('savedUsername');
+            if (savedUsername) {
+                document.getElementById('username').value = savedUsername;
+                document.getElementById('rememberUsername').checked = true;
+            }
+            
+            loginForm.addEventListener('submit', function(e) {
+                e.preventDefault();
+                
+                const username = document.getElementById('username').value;
+                const password = document.getElementById('password').value;
+                const authCode = document.getElementById('authCode').value;
+                
+                // 记住用户名
+                if (document.getElementById('rememberUsername').checked) {
+                    localStorage.setItem('savedUsername', username);
+                } else {
+                    localStorage.removeItem('savedUsername');
+                }
+                
+                // 这里只是前端模拟验证，实际应用中应该发送到后端进行验证
+                if (validateCredentials(username, password, authCode)) {
+                    // 设置登录状态
+                    sessionStorage.setItem('isLoggedIn', 'true');
+                    sessionStorage.setItem('username', username);
+                    
+                    // 登录成功，显示成功动画然后重定向
+                    document.querySelector('.login-container').classList.add('animate__fadeOut');
+                    setTimeout(() => {
+                        window.location.href = 'pages/orderList.html'; // 直接跳转到订单页面
+                    }, 800);
+                } else {
+                    // 显示错误信息
+                    authError.style.display = 'block';
+                    authError.classList.remove('animate__headShake');
+                    void authError.offsetWidth; // 触发重绘
+                    authError.classList.add('animate__headShake');
+                    
+                    setTimeout(() => {
+                        authError.classList.add('animate__fadeOut');
+                        setTimeout(() => {
+                            authError.style.display = 'none';
+                            authError.classList.remove('animate__fadeOut');
+                        }, 500);
+                    }, 3000);
+                }
+            });
+            
+            // 前端模拟验证逻辑，实际应用中应该在后端进行
+            function validateCredentials(username, password, authCode) {
+                // 示例验证逻辑，实际开发中应替换为真实的验证逻辑
+                const validUsers = [
+                    { username: 'admin', password: 'admin123', authCode: 'AUTH2024' },
+                    { username: 'user1', password: 'user123', authCode: 'AUTH2024' }
+                ];
+                
+                return validUsers.some(user => 
+                    user.username === username && 
+                    user.password === password && 
+                    user.authCode === authCode
+                );
+            }
+            
+            // 表单输入框焦点效果
+            const inputs = document.querySelectorAll('.form-control');
+            inputs.forEach(input => {
+                input.addEventListener('focus', function() {
+                    this.parentElement.querySelector('.form-icon').style.color = '#36b37e';
+                });
+                
+                input.addEventListener('blur', function() {
+                    this.parentElement.querySelector('.form-icon').style.color = '#97a0af';
+                });
+            });
+        });
+    </script>
+</body>
+</html> 

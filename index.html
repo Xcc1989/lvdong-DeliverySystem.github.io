@@ -1,0 +1,301 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>绿动发货系统 | Green Shipping System</title>
+    <!-- 引入Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- 引入Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
+    <!-- 引入自定义样式表 -->
+    <link rel="stylesheet" href="styles/main.css">
+    <style>
+        body {
+            font-family: 'Microsoft YaHei', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #f9f9f9;
+        }
+        .landing-page {
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+        .header {
+            background-color: #ffffff;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            padding: 1rem 0;
+        }
+        .main-content {
+            flex-grow: 1;
+            padding: 3rem 0;
+        }
+        .footer {
+            background-color: #343a40;
+            color: #ffffff;
+            padding: 2rem 0;
+            margin-top: auto;
+        }
+        .feature-card {
+            background-color: #ffffff;
+            border-radius: 10px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.08);
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+            height: 100%;
+            overflow: hidden;
+        }
+        .feature-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 25px rgba(0,0,0,0.15);
+        }
+        .feature-icon {
+            font-size: 2.5rem;
+            margin-bottom: 1.5rem;
+            color: #0d6efd;
+        }
+        .language-switcher {
+            margin-left: 15px;
+        }
+        .language-switcher .btn {
+            padding: 0.25rem 0.5rem;
+            font-size: 0.875rem;
+        }
+        .custom-language-dropdown .dropdown-item {
+            padding: 0.5rem 1.5rem;
+            font-size: 0.875rem;
+        }
+    </style>
+</head>
+<body>
+    <div class="landing-page">
+        <header class="header">
+            <div class="container">
+                <div class="d-flex justify-content-between align-items-center">
+                    <div class="d-flex align-items-center">
+                        <a href="index.html" class="text-decoration-none">
+                            <h1 class="h3 m-0 text-primary">
+                                <i class="fas fa-truck-fast me-2"></i>
+                                <span class="lang-zh">绿动发货系统</span>
+                                <span class="lang-en d-none">Green Shipping System</span>
+                            </h1>
+                        </a>
+                        
+                        <!-- 语言切换器 -->
+                        <div class="language-switcher dropdown">
+                            <button class="btn btn-outline-primary dropdown-toggle" type="button" id="languageDropdown" data-bs-toggle="dropdown" aria-expanded="false">
+                                <i class="fas fa-globe me-1"></i>
+                                <span class="lang-zh">中文</span>
+                                <span class="lang-en d-none">English</span>
+                            </button>
+                            <ul class="dropdown-menu custom-language-dropdown" aria-labelledby="languageDropdown">
+                                <li><a class="dropdown-item" href="#" data-lang="zh">中文</a></li>
+                                <li><a class="dropdown-item" href="#" data-lang="en">English</a></li>
+                            </ul>
+                        </div>
+                    </div>
+                    
+                    <div>
+                        <a href="login.html" class="btn btn-primary">
+                            <i class="fas fa-sign-in-alt me-1"></i>
+                            <span class="lang-zh">登录</span>
+                            <span class="lang-en d-none">Login</span>
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </header>
+
+        <main class="main-content">
+            <div class="container">
+                <div class="row mb-5 text-center">
+                    <div class="col-lg-8 mx-auto">
+                        <h2 class="display-4 fw-bold mb-3">
+                            <span class="lang-zh">高效、智能的物流发货解决方案</span>
+                            <span class="lang-en d-none">Efficient, Intelligent Logistics Solution</span>
+                        </h2>
+                        <p class="lead text-muted">
+                            <span class="lang-zh">一站式管理订单发货、物流跟踪和数据分析，让您的物流管理更轻松</span>
+                            <span class="lang-en d-none">One-stop management for order shipping, logistics tracking and data analysis, making your logistics management easier</span>
+                        </p>
+                        <div class="mt-4">
+                            <a href="pages/orderList.html" class="btn btn-primary btn-lg px-4 me-2">
+                                <i class="fas fa-box me-1"></i>
+                                <span class="lang-zh">开始使用</span>
+                                <span class="lang-en d-none">Get Started</span>
+                            </a>
+                            <a href="#features" class="btn btn-outline-secondary btn-lg px-4">
+                                <i class="fas fa-info-circle me-1"></i>
+                                <span class="lang-zh">了解更多</span>
+                                <span class="lang-en d-none">Learn More</span>
+                            </a>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="row mb-5" id="features">
+                    <div class="col-lg-4 mb-4">
+                        <div class="feature-card p-4 text-center">
+                            <div class="feature-icon">
+                                <i class="fas fa-clipboard-list"></i>
+                            </div>
+                            <h3>
+                                <span class="lang-zh">订单发货管理</span>
+                                <span class="lang-en d-none">Order Shipping Management</span>
+                            </h3>
+                            <p class="text-muted">
+                                <span class="lang-zh">轻松管理订单发货流程，高效处理大量订单，自动生成运单</span>
+                                <span class="lang-en d-none">Easily manage order shipping process, efficiently handle large volumes of orders, automatically generate waybills</span>
+                            </p>
+                        </div>
+                    </div>
+                    <div class="col-lg-4 mb-4">
+                        <div class="feature-card p-4 text-center">
+                            <div class="feature-icon">
+                                <i class="fas fa-shipping-fast"></i>
+                            </div>
+                            <h3>
+                                <span class="lang-zh">物流轨迹查询</span>
+                                <span class="lang-en d-none">Logistics Tracking</span>
+                            </h3>
+                            <p class="text-muted">
+                                <span class="lang-zh">实时跟踪包裹位置，获取最新物流动态，确保配送透明可见</span>
+                                <span class="lang-en d-none">Track package location in real-time, get the latest logistics updates, ensure transparent delivery</span>
+                            </p>
+                        </div>
+                    </div>
+                    <div class="col-lg-4 mb-4">
+                        <div class="feature-card p-4 text-center">
+                            <div class="feature-icon">
+                                <i class="fas fa-chart-line"></i>
+                            </div>
+                            <h3>
+                                <span class="lang-zh">数据分析报表</span>
+                                <span class="lang-en d-none">Data Analysis Reports</span>
+                            </h3>
+                            <p class="text-muted">
+                                <span class="lang-zh">生成详细物流报表，分析配送效率，优化物流成本</span>
+                                <span class="lang-en d-none">Generate detailed logistics reports, analyze delivery efficiency, optimize logistics costs</span>
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </main>
+
+        <footer class="footer">
+            <div class="container">
+                <div class="row">
+                    <div class="col-md-4 mb-4 mb-md-0">
+                        <h5>
+                            <span class="lang-zh">关于我们</span>
+                            <span class="lang-en d-none">About Us</span>
+                        </h5>
+                        <p class="text-muted">
+                            <span class="lang-zh">绿动发货系统致力于提供高效、环保的物流解决方案，助力企业降低物流成本，提升客户满意度。</span>
+                            <span class="lang-en d-none">Green Shipping System is committed to providing efficient, environmentally friendly logistics solutions to help businesses reduce logistics costs and improve customer satisfaction.</span>
+                        </p>
+                    </div>
+                    <div class="col-md-4 mb-4 mb-md-0">
+                        <h5>
+                            <span class="lang-zh">联系我们</span>
+                            <span class="lang-en d-none">Contact Us</span>
+                        </h5>
+                        <ul class="list-unstyled">
+                            <li><i class="fas fa-envelope me-2"></i> contact@greenshipping.com</li>
+                            <li><i class="fas fa-phone me-2"></i> +86 400-123-4567</li>
+                            <li><i class="fas fa-map-marker-alt me-2"></i> 
+                                <span class="lang-zh">上海市浦东新区张江高科技园区</span>
+                                <span class="lang-en d-none">Zhangjiang Hi-Tech Park, Pudong, Shanghai</span>
+                            </li>
+                        </ul>
+                    </div>
+                    <div class="col-md-4">
+                        <h5>
+                            <span class="lang-zh">快速链接</span>
+                            <span class="lang-en d-none">Quick Links</span>
+                        </h5>
+                        <ul class="list-unstyled">
+                            <li><a href="pages/orderList.html" class="text-light">
+                                <span class="lang-zh">订单发货明细</span>
+                                <span class="lang-en d-none">Order Shipping Details</span>
+                            </a></li>
+                            <li><a href="pages/logisticsDashboard.html" class="text-light">
+                                <span class="lang-zh">物流动态看板</span>
+                                <span class="lang-en d-none">Logistics Dashboard</span>
+                            </a></li>
+                            <li><a href="pages/accountDetails.html" class="text-light">
+                                <span class="lang-zh">物流对账明细</span>
+                                <span class="lang-en d-none">Logistics Accounting Details</span>
+                            </a></li>
+                        </ul>
+                    </div>
+                </div>
+                <hr class="my-4 bg-light">
+                <div class="d-flex justify-content-between align-items-center">
+                    <p class="m-0 text-muted small">
+                        <span class="lang-zh">&copy; 2024 绿动发货系统 版权所有</span>
+                        <span class="lang-en d-none">&copy; 2024 Green Shipping System. All rights reserved</span>
+                    </p>
+                    <div>
+                        <a href="#" class="text-light me-2"><i class="fab fa-facebook"></i></a>
+                        <a href="#" class="text-light me-2"><i class="fab fa-twitter"></i></a>
+                        <a href="#" class="text-light me-2"><i class="fab fa-linkedin"></i></a>
+                    </div>
+                </div>
+            </div>
+        </footer>
+    </div>
+
+    <!-- 引入Bootstrap和其他JS文件 -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+    
+    <!-- 语言切换脚本 -->
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // 从本地存储中获取语言偏好
+            const savedLang = localStorage.getItem('preferredLanguage') || 'zh';
+            
+            // 应用保存的语言
+            switchLanguage(savedLang);
+            
+            // 语言切换功能
+            document.querySelectorAll('.dropdown-item[data-lang]').forEach(item => {
+                item.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    const lang = this.getAttribute('data-lang');
+                    switchLanguage(lang);
+                    
+                    // 保存语言偏好
+                    localStorage.setItem('preferredLanguage', lang);
+                });
+            });
+            
+            function switchLanguage(lang) {
+                // 隐藏所有语言元素
+                document.querySelectorAll('.lang-zh, .lang-en').forEach(el => {
+                    el.classList.add('d-none');
+                });
+                
+                // 显示选中语言的元素
+                document.querySelectorAll(`.lang-${lang}`).forEach(el => {
+                    el.classList.remove('d-none');
+                });
+                
+                // 更新HTML语言属性
+                document.documentElement.lang = lang;
+                
+                // 更新下拉按钮文本
+                const dropdown = document.getElementById('languageDropdown');
+                if (dropdown) {
+                    dropdown.innerHTML = `
+                        <i class="fas fa-globe me-1"></i>
+                        ${lang === 'zh' ? '中文' : 'English'}
+                    `;
+                }
+                
+                // 触发自定义事件，便于其他脚本响应语言变化
+                document.dispatchEvent(new CustomEvent('languageChanged', { detail: { language: lang } }));
+            }
+        });
+    </script>
+</body>
+</html>

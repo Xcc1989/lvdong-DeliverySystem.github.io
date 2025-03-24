@@ -1,0 +1,260 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>订单发货明细导入模板</title>
+    <!-- 引入SheetJS (xlsx库) -->
+    <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 20px;
+            background-color: #f5f7fa;
+        }
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            background: white;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        h1 {
+            color: #2196F3;
+            margin-top: 0;
+        }
+        .btn {
+            background: #2196F3;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 16px;
+            margin-top: 20px;
+        }
+        .btn:hover {
+            background: #1976D2;
+        }
+        .template-info {
+            margin: 20px 0;
+            padding: 15px;
+            background: #f1f8e9;
+            border-left: 4px solid #8bc34a;
+            border-radius: 4px;
+        }
+        .alert-info {
+            margin: 20px 0;
+            padding: 15px;
+            background: #e3f2fd;
+            border-left: 4px solid #2196F3;
+            border-radius: 4px;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 20px 0;
+        }
+        th, td {
+            border: 1px solid #ddd;
+            padding: 10px;
+            text-align: left;
+        }
+        th {
+            background-color: #f5f5f5;
+        }
+        .required {
+            color: red;
+            font-weight: bold;
+        }
+        .optional {
+            color: #888;
+        }
+        .highlight {
+            background-color: #fff9c4;
+        }
+        .preview-img {
+            max-width: 100%;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            margin: 20px 0;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>订单发货明细导入模板</h1>
+        
+        <div class="template-info">
+            <p><strong>简化导入流程：</strong>只需提供5个必填字段即可成功导入订单发货明细。</p>
+            <p>点击下方按钮可下载标准格式的Excel模板文件。</p>
+        </div>
+        
+        <div class="alert-info">
+            <p><strong>重要提示：</strong>本系统导入订单后，您可以在订单列表中：</p>
+            <ul>
+                <li>选择快递公司</li>
+                <li>生成运单号</li>
+                <li>打印快递单</li>
+                <li>查看物流动态</li>
+            </ul>
+            <p>导入时只需提供基本的订单和收件人信息即可。</p>
+        </div>
+        
+        <h2>模板字段说明</h2>
+        <table>
+            <thead>
+                <tr>
+                    <th>字段名称</th>
+                    <th>说明</th>
+                    <th>是否必填</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr class="highlight">
+                    <td><strong>订单时间</strong></td>
+                    <td>订单创建的日期，格式：YYYY-MM-DD</td>
+                    <td class="required">是</td>
+                </tr>
+                <tr class="highlight">
+                    <td><strong>订单号</strong></td>
+                    <td>订单的唯一编号</td>
+                    <td class="required">是</td>
+                </tr>
+                <tr class="highlight">
+                    <td><strong>地址</strong></td>
+                    <td>收件人详细地址</td>
+                    <td class="required">是</td>
+                </tr>
+                <tr class="highlight">
+                    <td><strong>联系人</strong></td>
+                    <td>收件人姓名</td>
+                    <td class="required">是</td>
+                </tr>
+                <tr class="highlight">
+                    <td><strong>联系方式</strong></td>
+                    <td>收件人电话号码</td>
+                    <td class="required">是</td>
+                </tr>
+                <tr>
+                    <td>重量(kg)</td>
+                    <td>包裹重量，单位：千克</td>
+                    <td class="optional">否</td>
+                </tr>
+                <tr>
+                    <td>快递公司</td>
+                    <td>如：顺丰速运、中通快递等</td>
+                    <td class="optional">否</td>
+                </tr>
+                <tr>
+                    <td>运单号</td>
+                    <td>快递单号</td>
+                    <td class="optional">否</td>
+                </tr>
+                <tr>
+                    <td>运费</td>
+                    <td>快递费用</td>
+                    <td class="optional">否</td>
+                </tr>
+                <tr>
+                    <td>寄件时间</td>
+                    <td>发出快递的日期时间，格式：YYYY-MM-DD</td>
+                    <td class="optional">否</td>
+                </tr>
+                <tr>
+                    <td>物流状态</td>
+                    <td>如：待发货、已发货、运输中、已签收等</td>
+                    <td class="optional">否</td>
+                </tr>
+                <tr>
+                    <td>收件时间</td>
+                    <td>客户收到快递的日期时间，格式：YYYY-MM-DD</td>
+                    <td class="optional">否</td>
+                </tr>
+                <tr>
+                    <td>是否签收</td>
+                    <td>填写"是"或"否"</td>
+                    <td class="optional">否</td>
+                </tr>
+            </tbody>
+        </table>
+        
+        <h2>示例预览</h2>
+        <p>最简模板只需包含5个必填字段：</p>
+        <div>
+        <button id="downloadTemplate" class="btn">下载Excel模板</button>
+    </div>
+    
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // 下载模板按钮事件
+            document.getElementById('downloadTemplate').addEventListener('click', function() {
+                generateTemplate();
+            });
+            
+            // 生成Excel模板
+            function generateTemplate() {
+                try {
+                    // 检查XLSX库是否加载
+                    if (typeof XLSX === 'undefined') {
+                        alert('Excel处理库未加载，请刷新页面重试');
+                        return;
+                    }
+                    
+                    // 创建工作簿
+                    const wb = XLSX.utils.book_new();
+                    
+                    // 模板表头
+                    const headers = [
+                        '订单时间', '订单号', '重量(kg)', '地址', '联系人', '联系方式',
+                        '快递公司', '运单号', '运费', '寄件时间', '物流状态', '最新更新',
+                        '收件时间', '是否签收'
+                    ];
+                    
+                    // 创建示例数据（一行空数据用于填写）
+                    const data = [
+                        headers,
+                        ['2024-03-21', 'DD20240321001', '2.5', '上海市浦东新区张江高科技园区', '张三', '13800138000',
+                         '顺丰速运', '', '', '', '待发货', '', '', '否'],
+                        []  // 空行，用于用户填写
+                    ];
+                    
+                    // 创建工作表
+                    const ws = XLSX.utils.aoa_to_sheet(data);
+                    
+                    // 设置列宽
+                    const colWidths = [
+                        { wch: 12 },  // 订单时间
+                        { wch: 15 },  // 订单号
+                        { wch: 8 },   // 重量
+                        { wch: 30 },  // 地址
+                        { wch: 10 },  // 联系人
+                        { wch: 15 },  // 联系方式
+                        { wch: 10 },  // 快递公司
+                        { wch: 15 },  // 运单号
+                        { wch: 8 },   // 运费
+                        { wch: 12 },  // 寄件时间
+                        { wch: 10 },  // 物流状态
+                        { wch: 25 },  // 最新更新
+                        { wch: 12 },  // 收件时间
+                        { wch: 8 }    // 是否签收
+                    ];
+                    ws['!cols'] = colWidths;
+                    
+                    // 添加工作表到工作簿
+                    XLSX.utils.book_append_sheet(wb, ws, '订单发货明细');
+                    
+                    // 导出Excel文件
+                    XLSX.writeFile(wb, '订单发货明细导入模板.xlsx');
+                    
+                } catch (error) {
+                    console.error('生成模板失败:', error);
+                    alert('生成模板失败，请刷新页面后重试');
+                }
+            }
+        });
+    </script>
+</body>
+</html> 

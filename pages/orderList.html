@@ -1,0 +1,878 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>订单发货明细</title>
+    <!-- 登录验证 -->
+    <script>
+        // 检查登录状态
+        if (sessionStorage.getItem('isLoggedIn') !== 'true') {
+            // 未登录，跳转到登录页
+            window.location.href = '../login.html';
+        }
+    </script>
+    <!-- 引入Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- 引入Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
+    <!-- 引入自定义样式表 -->
+    <link rel="stylesheet" href="../styles/order-list.css">
+    <!-- 引入API配置文件 -->
+    <script src="../config/api-config.js"></script>
+    <!-- 引入仓储API服务 -->
+    <script src="../services/warehouseService.js"></script>
+    <!-- 引入IndexedDB本地存储服务 -->
+    <script src="../services/indexedDBService.js"></script>
+    <!-- 引入快递100 API服务 -->
+    <script src="../services/kuaidi100Service.js"></script>
+    <!-- 引入SweetAlert2库，用于更好的用户交互体验 -->
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <!-- 引入MD5库，用于快递100 API的签名计算 -->
+    <script src="https://cdn.jsdelivr.net/npm/blueimp-md5@2.19.0/js/md5.min.js"></script>
+    <style>
+        /* 表头筛选图标样式 */
+        .filter-icon {
+            cursor: pointer;
+            margin-left: 5px;
+            opacity: 0.6;
+        }
+        .filter-icon:hover {
+            opacity: 1;
+        }
+        
+        /* 筛选弹窗样式 */
+        .filter-popup {
+            position: absolute;
+            background-color: white;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.15);
+            z-index: 1000;
+            width: 250px;
+        }
+        .filter-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 8px 12px;
+            border-bottom: 1px solid #ddd;
+            background-color: #f8f9fa;
+            border-top-left-radius: 4px;
+            border-top-right-radius: 4px;
+        }
+        .filter-content {
+            padding: 12px;
+            max-height: 300px;
+            overflow-y: auto;
+        }
+        .filter-footer {
+            padding: 8px 12px;
+            border-top: 1px solid #ddd;
+            display: flex;
+            justify-content: flex-end;
+        }
+        .page-content {
+            padding: 30px;
+            background: #f5f7fa;
+        }
+        
+        .filter-section {
+            background: white;
+            border-radius: 15px;
+            padding: 20px;
+            margin-bottom: 30px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+        }
+        
+        .table-container {
+            background: white;
+            border-radius: 15px;
+            padding: 20px;
+            margin-bottom: 30px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+            overflow-x: auto;
+        }
+        
+        .table th {
+            background: #f8f9fa;
+            border-bottom: 2px solid #dee2e6;
+            white-space: nowrap;
+        }
+        
+        .table td {
+            vertical-align: middle;
+            white-space: nowrap;
+        }
+        
+        .btn-group {
+            white-space: nowrap;
+        }
+        
+        .form-control {
+            border-radius: 8px;
+            border: 2px solid #e0e0e0;
+            padding: 10px 15px;
+        }
+        
+        .form-control:focus {
+            border-color: #2196F3;
+            box-shadow: none;
+        }
+        
+        .btn-primary {
+            background: #2196F3;
+            border: none;
+            border-radius: 8px;
+            padding: 10px 20px;
+        }
+        
+        .btn-primary:hover {
+            background: #1976D2;
+        }
+        
+        .btn-success {
+            background: #66bb6a;
+            border: none;
+            border-radius: 8px;
+            padding: 10px 20px;
+        }
+        
+        .btn-success:hover {
+            background: #4caf50;
+        }
+        
+        /* 表头筛选样式 */
+        .th-with-filter {
+            position: relative;
+            white-space: nowrap;
+        }
+        
+        .th-with-filter .filter-indicator {
+            display: inline-block;
+            width: 6px;
+            height: 6px;
+            background-color: #2196F3;
+            border-radius: 50%;
+            position: absolute;
+            top: 4px;
+            right: 4px;
+            opacity: 0;
+            transition: opacity 0.3s;
+        }
+        
+        .th-with-filter.filtered .filter-indicator {
+            opacity: 1;
+        }
+        
+        /* 物流查询时间线样式 */
+        .timeline {
+            position: relative;
+            padding-left: 30px;
+            max-height: 400px;
+            overflow-y: auto;
+        }
+        
+        .timeline:before {
+            content: '';
+            position: absolute;
+            left: 10px;
+            top: 0;
+            height: 100%;
+            width: 2px;
+            background: #e9ecef;
+        }
+        
+        .timeline-item {
+            position: relative;
+            padding-bottom: 20px;
+        }
+        
+        .timeline-item:before {
+            content: '';
+            position: absolute;
+            left: -30px;
+            top: 0;
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            background: #6c757d;
+            border: 2px solid #fff;
+        }
+        
+        .timeline-item.active:before {
+            background: #198754;
+        }
+        
+        .timeline-date {
+            font-size: 12px;
+            color: #6c757d;
+            margin-bottom: 5px;
+        }
+        
+        .timeline-content {
+            background: #f8f9fa;
+            padding: 10px;
+            border-radius: 4px;
+        }
+        
+        .timeline-title {
+            font-weight: 500;
+        }
+    </style>
+</head>
+<body class="order-list-content">
+    <!-- 顶部导航栏 -->
+    <nav class="navbar navbar-expand-lg navbar-light bg-light shadow-sm fixed-top">
+        <div class="container-fluid">
+            <a class="navbar-brand" href="#">
+                <i class="fas fa-truck-fast text-primary me-2"></i>绿动发货系统
+            </a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav">
+                    <li class="nav-item">
+                        <a class="nav-link active fw-bold" href="orderList.html">
+                            <span class="lang-zh">订单发货明细</span>
+                            <span class="lang-en d-none">Order Shipping Details</span>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="logisticsDashboard.html">
+                            <span class="lang-zh">物流动态看板</span>
+                            <span class="lang-en d-none">Logistics Dashboard</span>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="accountDetails.html">
+                            <span class="lang-zh">物流对账明细</span>
+                            <span class="lang-en d-none">Logistics Accounting</span>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="taskDashboard.html">
+                            <span class="lang-zh">任务动态看板</span>
+                            <span class="lang-en d-none">Task Dashboard</span>
+                        </a>
+                    </li>
+                </ul>
+                <ul class="navbar-nav ms-auto">
+                    <!-- 语言切换器 -->
+                    <li class="nav-item dropdown me-2">
+                        <a class="nav-link dropdown-toggle" href="#" id="languageDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                            <i class="fas fa-globe me-1"></i>
+                            <span class="lang-zh">中文</span>
+                            <span class="lang-en d-none">English</span>
+                        </a>
+                        <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="languageDropdown">
+                            <li><a class="dropdown-item" href="#" data-lang="zh">中文</a></li>
+                            <li><a class="dropdown-item" href="#" data-lang="en">English</a></li>
+                        </ul>
+                    </li>
+                    <li class="nav-item dropdown">
+                        <a class="nav-link dropdown-toggle" href="#" id="userDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                            <i class="fas fa-user-circle me-1"></i><span id="currentUsername">用户</span>
+                        </a>
+                        <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="userDropdown">
+                            <li><a class="dropdown-item" href="#" id="logoutBtn">
+                                <i class="fas fa-sign-out-alt me-2"></i>
+                                <span class="lang-zh">退出登录</span>
+                                <span class="lang-en d-none">Logout</span>
+                            </a></li>
+                        </ul>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <!-- 为顶部导航栏留出空间 -->
+    <div style="height: 70px;"></div>
+
+    <div class="container-fluid">
+        <!-- 标题和操作按钮 -->
+        <div class="row mt-3 mb-4">
+            <div class="col">
+                <h2 class="mb-0">
+                    <span class="lang-zh">订单发货明细</span>
+                    <span class="lang-en d-none">Order Shipping Details</span>
+                </h2>
+            </div>
+            <div class="col-auto">
+                <!-- 本地存档按钮将由orderList.js动态添加 -->
+                <!-- 快递100设置按钮将由orderList.js动态添加 -->
+                <div class="d-flex justify-content-between align-items-center mb-3">
+                    <div class="action-buttons">
+                        <button id="generateWaybillBtn" class="btn btn-primary">
+                            <span class="lang-zh">生成运单</span>
+                            <span class="lang-en d-none">Generate Waybill</span>
+                        </button>
+                        <button id="printWaybillBtn" class="btn btn-info ms-2">
+                            <span class="lang-zh">批量打印</span>
+                            <span class="lang-en d-none">Batch Print</span>
+                        </button>
+                        <button id="exportDataBtn" class="btn btn-success ms-2">
+                            <span class="lang-zh">导出数据</span>
+                            <span class="lang-en d-none">Export Data</span>
+                        </button>
+                    </div>
+                    <div class="import-buttons">
+                        <button id="localImportBtn" class="btn btn-outline-primary">
+                            <i class="fas fa-file-excel me-1"></i>
+                            <span class="lang-zh">本地Excel导入</span>
+                            <span class="lang-en d-none">Import Excel</span>
+                        </button>
+                        <button id="apiImportBtn" class="btn btn-outline-secondary ms-2">
+                            <i class="fas fa-cloud-download-alt me-1"></i>
+                            <span class="lang-zh">API数据导入</span>
+                            <span class="lang-en d-none">API Import</span>
+                        </button>
+                        <button id="templateBtn" class="btn btn-outline-info ms-2" onclick="window.location.href='../templates/订单发货明细导入模板.html'">
+                            <i class="fas fa-download me-1"></i>
+                            <span class="lang-zh">下载模板</span>
+                            <span class="lang-en d-none">Template</span>
+                        </button>
+                    </div>
+                </div>
+            </div>
+            </div>
+
+        <!-- 筛选区域 -->
+        <div class="row mb-4 filter-section">
+            <div class="col-md-10">
+                <div class="row g-3">
+                    <div class="col-md-3">
+                        <label for="startDate" class="form-label">
+                            <span class="lang-zh">开始日期</span>
+                            <span class="lang-en d-none">Start Date</span>
+                        </label>
+                        <input type="date" class="form-control" id="startDate">
+                    </div>
+                    <div class="col-md-3">
+                        <label for="endDate" class="form-label">
+                            <span class="lang-zh">结束日期</span>
+                            <span class="lang-en d-none">End Date</span>
+                        </label>
+                        <input type="date" class="form-control" id="endDate">
+                    </div>
+                    <div class="col-md-3">
+                        <label for="expressCompanyFilter" class="form-label">
+                            <span class="lang-zh">快递公司</span>
+                            <span class="lang-en d-none">Express Company</span>
+                        </label>
+                        <select class="form-select" id="expressCompanyFilter">
+                            <option value="">
+                                <span class="lang-zh">全部</span>
+                                <span class="lang-en d-none">All</span>
+                            </option>
+                            <option value="顺丰速运">
+                                <span class="lang-zh">顺丰速运</span>
+                                <span class="lang-en d-none">SF Express</span>
+                            </option>
+                            <option value="中通快递">
+                                <span class="lang-zh">中通快递</span>
+                                <span class="lang-en d-none">ZTO Express</span>
+                            </option>
+                            <option value="圆通速递">
+                                <span class="lang-zh">圆通速递</span>
+                                <span class="lang-en d-none">YTO Express</span>
+                            </option>
+                            <option value="韵达快递">
+                                <span class="lang-zh">韵达快递</span>
+                                <span class="lang-en d-none">YD Express</span>
+                            </option>
+                            <option value="申通快递">
+                                <span class="lang-zh">申通快递</span>
+                                <span class="lang-en d-none">STO Express</span>
+                            </option>
+                            <option value="EMS">EMS</option>
+                            <option value="京东物流">
+                                <span class="lang-zh">京东物流</span>
+                                <span class="lang-en d-none">JD Logistics</span>
+                            </option>
+                            <option value="百世快递">
+                                <span class="lang-zh">百世快递</span>
+                                <span class="lang-en d-none">BEST Express</span>
+                            </option>
+                        </select>
+                    </div>
+                    <div class="col-md-3">
+                        <label for="logisticsStatusFilter" class="form-label">
+                            <span class="lang-zh">物流状态</span>
+                            <span class="lang-en d-none">Logistics Status</span>
+                        </label>
+                        <select class="form-select" id="logisticsStatusFilter">
+                            <option value="">
+                                <span class="lang-zh">全部</span>
+                                <span class="lang-en d-none">All</span>
+                            </option>
+                            <option value="待发货">
+                                <span class="lang-zh">待发货</span>
+                                <span class="lang-en d-none">Pending</span>
+                            </option>
+                            <option value="已发货">
+                                <span class="lang-zh">已发货</span>
+                                <span class="lang-en d-none">Shipped</span>
+                            </option>
+                            <option value="运输中">
+                                <span class="lang-zh">运输中</span>
+                                <span class="lang-en d-none">In Transit</span>
+                            </option>
+                            <option value="派送中">
+                                <span class="lang-zh">派送中</span>
+                                <span class="lang-en d-none">Out for Delivery</span>
+                            </option>
+                            <option value="已签收">
+                                <span class="lang-zh">已签收</span>
+                                <span class="lang-en d-none">Delivered</span>
+                            </option>
+                            <option value="异常">
+                                <span class="lang-zh">异常</span>
+                                <span class="lang-en d-none">Exception</span>
+                            </option>
+                            <option value="退回中">
+                                <span class="lang-zh">退回中</span>
+                                <span class="lang-en d-none">Returning</span>
+                            </option>
+                        </select>
+                                    </div>
+                                </div>
+                            </div>
+            <div class="col-md-2 d-flex align-items-end justify-content-end">
+                <div class="input-group">
+                    <input type="text" class="form-control" id="searchInput" placeholder="搜索订单..." data-en-placeholder="Search orders...">
+                    <button class="btn btn-outline-secondary" type="button" id="searchBtn">
+                        <i class="fas fa-search"></i>
+                    </button>
+                            </div>
+                        </div>
+                    </div>
+                    
+        <!-- 订单表格 -->
+                            <div class="table-responsive">
+            <table class="table table-hover table-striped table-bordered">
+                <thead class="table-primary">
+                    <tr>
+                        <th width="40"><input type="checkbox" id="selectAll"></th>
+                        <th>
+                            <span class="lang-zh">订单时间</span>
+                            <span class="lang-en d-none">Order Time</span>
+                            <i class="fas fa-filter filter-icon" data-column="orderTime"></i>
+                        </th>
+                        <th>
+                            <span class="lang-zh">订单号</span>
+                            <span class="lang-en d-none">Order Number</span>
+                            <i class="fas fa-filter filter-icon" data-column="orderNumber"></i>
+                        </th>
+                        <th>
+                            <span class="lang-zh">重量(kg)</span>
+                            <span class="lang-en d-none">Weight(kg)</span>
+                            <i class="fas fa-filter filter-icon" data-column="weight"></i>
+                        </th>
+                        <th>
+                            <span class="lang-zh">地址</span>
+                            <span class="lang-en d-none">Address</span>
+                            <i class="fas fa-filter filter-icon" data-column="address"></i>
+                        </th>
+                        <th>
+                            <span class="lang-zh">联系人</span>
+                            <span class="lang-en d-none">Contact</span>
+                            <i class="fas fa-filter filter-icon" data-column="contact"></i>
+                        </th>
+                        <th>
+                            <span class="lang-zh">联系方式</span>
+                            <span class="lang-en d-none">Phone</span>
+                            <i class="fas fa-filter filter-icon" data-column="phone"></i>
+                        </th>
+                        <th>
+                            <span class="lang-zh">快递公司</span>
+                            <span class="lang-en d-none">Express</span>
+                            <i class="fas fa-filter filter-icon" data-column="expressCompany"></i>
+                        </th>
+                        <th>
+                            <span class="lang-zh">运单号</span>
+                            <span class="lang-en d-none">Waybill No.</span>
+                            <i class="fas fa-filter filter-icon" data-column="waybillNumber"></i>
+                        </th>
+                        <th>
+                            <span class="lang-zh">模板</span>
+                            <span class="lang-en d-none">Template</span>
+                            <i class="fas fa-filter filter-icon" data-column="waybillTemplate"></i>
+                        </th>
+                        <th>
+                            <span class="lang-zh">运费</span>
+                            <span class="lang-en d-none">Fee</span>
+                            <i class="fas fa-filter filter-icon" data-column="shippingFee"></i>
+                        </th>
+                        <th>
+                            <span class="lang-zh">寄件时间</span>
+                            <span class="lang-en d-none">Ship Time</span>
+                            <i class="fas fa-filter filter-icon" data-column="shippingTime"></i>
+                        </th>
+                        <th>
+                            <span class="lang-zh">物流状态</span>
+                            <span class="lang-en d-none">Status</span>
+                            <i class="fas fa-filter filter-icon" data-column="logisticsStatus"></i>
+                        </th>
+                        <th>
+                            <span class="lang-zh">收件时间</span>
+                            <span class="lang-en d-none">Receive Time</span>
+                            <i class="fas fa-filter filter-icon" data-column="receivingTime"></i>
+                        </th>
+                        <th>
+                            <span class="lang-zh">是否签收</span>
+                            <span class="lang-en d-none">Signed</span>
+                            <i class="fas fa-filter filter-icon" data-column="isSigned"></i>
+                        </th>
+                        <th>
+                            <span class="lang-zh">操作</span>
+                            <span class="lang-en d-none">Actions</span>
+                        </th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="orderTableBody">
+                    <!-- 数据将通过JavaScript动态填充 -->
+                                    </tbody>
+                                </table>
+                            </div>
+                            
+        <!-- 分页 -->
+        <div class="row mt-3">
+            <div class="col-md-6">
+                <p>
+                    <span class="lang-zh">显示</span>
+                    <span class="lang-en d-none">Showing</span>
+                    <span id="startRecord">1</span>
+                    <span class="lang-zh">到</span>
+                    <span class="lang-en d-none">to</span>
+                    <span id="endRecord">10</span>
+                    <span class="lang-zh">条，共</span>
+                    <span class="lang-en d-none">of</span>
+                    <span id="totalRecords">0</span>
+                    <span class="lang-zh">条记录</span>
+                    <span class="lang-en d-none">records</span>
+                </p>
+                                </div>
+            <div class="col-md-6">
+                <ul class="pagination justify-content-end" id="pagination">
+                    <li class="page-item disabled">
+                        <a class="page-link" href="#" data-page="prev">
+                            <span class="lang-zh">上一页</span>
+                            <span class="lang-en d-none">Previous</span>
+                                            </a>
+                                        </li>
+                    <li class="page-item active">
+                        <a class="page-link" href="#" data-page="1">1</a>
+                                        </li>
+                                        <li class="page-item">
+                        <a class="page-link" href="#" data-page="next">
+                            <span class="lang-zh">下一页</span>
+                            <span class="lang-en d-none">Next</span>
+                                            </a>
+                                        </li>
+                                    </ul>
+                        </div>
+                    </div>
+                </div>
+
+    <!-- 模板选择模态框 -->
+    <div class="modal fade" id="templateModal" tabindex="-1" aria-labelledby="templateModalLabel" aria-hidden="true">
+                    <div class="modal-dialog">
+                        <div class="modal-content">
+                            <div class="modal-header">
+                    <h5 class="modal-title" id="templateModalLabel">
+                        <span class="lang-zh">选择运单模板</span>
+                        <span class="lang-en d-none">Select Waybill Template</span>
+                    </h5>
+                                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                            </div>
+                            <div class="modal-body">
+                    <div class="templates-container">
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <div class="template-card" data-template="sf">
+                                    <img src="../assets/templates/sf-template.png" alt="顺丰运单模板" class="img-fluid">
+                                    <div class="template-name">
+                                        <span class="lang-zh">顺丰速运</span>
+                                        <span class="lang-en d-none">SF Express</span>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <div class="template-card" data-template="zt">
+                                    <img src="../assets/templates/zt-template.png" alt="中通运单模板" class="img-fluid">
+                                    <div class="template-name">
+                                        <span class="lang-zh">中通快递</span>
+                                        <span class="lang-en d-none">ZTO Express</span>
+                                    </div>
+                            </div>
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <div class="template-card" data-template="yt">
+                                    <img src="../assets/templates/yt-template.png" alt="圆通运单模板" class="img-fluid">
+                                    <div class="template-name">
+                                        <span class="lang-zh">圆通速递</span>
+                                        <span class="lang-en d-none">YTO Express</span>
+                        </div>
+                    </div>
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <div class="template-card" data-template="yd">
+                                    <img src="../assets/templates/yd-template.png" alt="韵达运单模板" class="img-fluid">
+                                    <div class="template-name">
+                                        <span class="lang-zh">韵达快递</span>
+                                        <span class="lang-en d-none">YD Express</span>
+                                    </div>
+                            </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+                        <span class="lang-zh">取消</span>
+                        <span class="lang-en d-none">Cancel</span>
+                    </button>
+                    <button type="button" class="btn btn-primary" id="confirmTemplate">
+                        <span class="lang-zh">确定</span>
+                        <span class="lang-en d-none">Confirm</span>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 隐藏的文件输入控件 -->
+    <input type="file" id="fileInput" accept=".xlsx,.xls,.csv" style="display: none;">
+
+    <!-- 引入Bootstrap和其他JS文件 -->
+                <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    
+    <!-- 引入Excel处理库 -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+    
+    <!-- 文件导入调试脚本 -->
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // 确保文件输入控件存在
+            if (!document.getElementById('fileInput')) {
+                console.error('未找到文件输入控件，创建一个新的');
+                const fileInput = document.createElement('input');
+                fileInput.type = 'file';
+                fileInput.id = 'fileInput';
+                fileInput.accept = '.xlsx,.xls,.csv';
+                fileInput.style.display = 'none';
+                document.body.appendChild(fileInput);
+            }
+            
+            // 手动添加本地导入点击事件
+            const localImportBtn = document.getElementById('localImportBtn');
+            if (localImportBtn) {
+                console.log('为本地导入按钮添加直接点击事件');
+                localImportBtn.onclick = function() {
+                    console.log('本地导入按钮被直接点击');
+                    const fileInput = document.getElementById('fileInput');
+                    if (fileInput) {
+                        console.log('触发文件选择器点击');
+                        fileInput.click();
+                    } else {
+                        console.error('仍未找到文件输入控件');
+                        alert('文件选择控件不可用，请刷新页面后重试');
+                    }
+                };
+            } else {
+                console.error('未找到本地导入按钮');
+            }
+        });
+    </script>
+    
+    <!-- 引入Excel处理库（优先使用CDN，如果失败则使用备用CDN） -->
+    <script>
+        // 加载XLSX库
+        function loadXLSX() {
+            return new Promise((resolve, reject) => {
+                if (typeof XLSX !== 'undefined') {
+                    console.log('XLSX库已加载');
+                    resolve(true);
+                    return;
+                }
+                
+                console.log('尝试加载XLSX库...');
+                
+                // 主CDN
+                const script = document.createElement('script');
+                script.src = 'https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js';
+                script.onload = () => {
+                    console.log('XLSX库已从主CDN加载');
+                    resolve(true);
+                };
+                script.onerror = () => {
+                    console.warn('主CDN加载失败，尝试备用CDN');
+                    
+                    // 备用CDN
+                    const backupScript = document.createElement('script');
+                    backupScript.src = 'https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js';
+                    backupScript.onload = () => {
+                        console.log('XLSX库已从备用CDN加载');
+                        resolve(true);
+                    };
+                    backupScript.onerror = () => {
+                        console.error('所有CDN加载失败');
+                        reject(new Error('无法加载XLSX库'));
+                    };
+                    document.body.appendChild(backupScript);
+                };
+                document.body.appendChild(script);
+            });
+        }
+        
+        document.addEventListener('DOMContentLoaded', function() {
+            // 预加载XLSX库
+            loadXLSX().catch(error => {
+                console.error('加载Excel处理库失败:', error);
+                Swal.fire({
+                    icon: 'warning',
+                    title: '功能受限',
+                    text: 'Excel导入功能可能不可用，因为无法加载必要的库',
+                    confirmButtonText: '我知道了'
+                });
+            });
+        });
+    </script>
+    
+    <!-- 语言切换脚本 -->
+    <script>
+        // 语言切换功能
+        function switchLanguage(lang) {
+            // 获取当前选择的语言
+            const currentLang = localStorage.getItem('preferredLanguage') || 'zh';
+            
+            // 如果点击的是当前语言，不做任何操作
+            if (lang === currentLang) {
+                console.log('当前已经是选择的语言:', lang);
+                return;
+            }
+            
+            // 存储语言偏好
+            localStorage.setItem('preferredLanguage', lang);
+            console.log('已切换语言至:', lang);
+            
+            // 触发自定义事件，通知其他脚本语言已更改
+            document.dispatchEvent(new Event('languageChanged'));
+            
+            // 强制刷新页面，确保所有元素正确显示
+            location.reload();
+        }
+
+        // 页面加载完成后初始化
+        document.addEventListener('DOMContentLoaded', function() {
+            // 设置当前语言
+            const currentLang = localStorage.getItem('preferredLanguage') || 'zh';
+            console.log('当前语言:', currentLang);
+            
+            // 更新语言下拉按钮文本
+            const langDropdown = document.getElementById('languageDropdown');
+            if (langDropdown) {
+                langDropdown.innerHTML = `<i class="fas fa-globe me-1"></i> ${currentLang === 'zh' ? '中文' : 'English'}`;
+            }
+            
+            // 为语言切换按钮添加事件监听器
+            document.querySelectorAll('.dropdown-item[data-lang]').forEach(item => {
+                item.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    const lang = this.getAttribute('data-lang');
+                    switchLanguage(lang);
+                });
+            });
+            
+            // 更新搜索框占位符
+            const searchInput = document.getElementById('searchInput');
+            if (searchInput) {
+                searchInput.placeholder = currentLang === 'zh' ? 
+                    '搜索订单号、运单号、联系人、电话或地址' : 
+                    'Search order no., waybill no., contact, phone or address';
+            }
+        });
+    </script>
+
+    <!-- 引入示例数据 -->
+    <script src="../orders-data.js"></script>
+    
+    <!-- 引入自定义脚本 -->
+                <script src="../scripts/orderList.js"></script>
+    
+    <!-- 调试信息脚本 -->
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            console.log('页面加载完成，检查数据可用性:');
+            // 延迟1秒检查数据，确保所有脚本已加载
+            setTimeout(() => {
+                if (typeof window.ordersData !== 'undefined') {
+                    console.log('✅ 示例数据可用: ' + window.ordersData.length + '条记录');
+                    // 检查表格是否有数据
+                    const tableBody = document.getElementById('orderTableBody');
+                    if (tableBody && tableBody.children.length > 0) {
+                        console.log('✅ 表格已成功渲染数据');
+                    } else {
+                        console.error('❌ 表格未显示数据，尝试手动渲染');
+                        // 如果表格没有渲染数据，尝试手动执行渲染函数
+                        if (typeof filterOrders === 'function') {
+                            filterOrders();
+                            console.log('已尝试手动渲染表格');
+                        }
+                    }
+                } else {
+                    console.error('❌ 示例数据未加载');
+                }
+            }, 1000);
+        });
+    </script>
+    
+    <!-- 用户认证和导航脚本 -->
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // 显示当前登录用户名
+            const currentUsername = sessionStorage.getItem('username') || '用户';
+            document.getElementById('currentUsername').textContent = currentUsername;
+            
+            // 处理退出登录
+            document.getElementById('logoutBtn').addEventListener('click', function(e) {
+                e.preventDefault();
+                
+                // 显示确认对话框
+                Swal.fire({
+                    title: '确认退出?',
+                    text: '您确定要退出登录吗？',
+                    icon: 'question',
+                    showCancelButton: true,
+                    confirmButtonColor: '#3085d6',
+                    cancelButtonColor: '#d33',
+                    confirmButtonText: '确认退出',
+                    cancelButtonText: '取消'
+                }).then((result) => {
+                    if (result.isConfirmed) {
+                        // 清除登录状态
+                        sessionStorage.removeItem('isLoggedIn');
+                        sessionStorage.removeItem('username');
+                        
+                        // 显示成功消息
+                        Swal.fire({
+                            title: '已退出登录',
+                            text: '您已成功退出系统',
+                            icon: 'success',
+                            timer: 1500,
+                            showConfirmButton: false
+                        }).then(() => {
+                            // 跳转到登录页
+                            window.location.href = '../login.html';
+                        });
+                    }
+                });
+            });
+        });
+    </script>
+            </body>
+            </html>
